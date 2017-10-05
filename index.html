@@ -52,9 +52,7 @@
         var results;
         function start() {
             results = document.getElementById('results');
-
             var sat = 6;
-            debugger;
             if (moment().isoWeekday() <= sat) {
                 // then just give me this week's instance of that day
                 sat =  moment().isoWeekday(sat);
