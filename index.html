@@ -1,122 +1,176 @@
 <html>
 <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js" type="application/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"
+            type="application/javascript"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+            integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g=" crossorigin="anonymous"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
     <style>
-        body{
+        body {
             text-align: center;
-            background-color:#00f;
+            background-color: #00f;
             color: #fff;
-            font-family: arial black,arial-w01-black,arial-w02-black,arial-w10 black,sans-serif;
-            padding:0;
+            font-family: arial black, arial-w01-black, arial-w02-black, arial-w10 black, sans-serif;
+            padding: 0;
             margin: 0;
         }
 
-        #header{
-            background-color:#f00;
+        #header {
+            background-color: #f00;
             line-height: 120px;
             font-size: 1.4em;
             text-align: center;
         }
 
-        #header img{
-            position:absolute;
+        #header img {
+            position: absolute;
             top: 10px;
             right: 20px;
         }
 
-        table{
+        table {
             margin-top: 20px;
 
         }
-        td{
+
+        td {
             padding: 4px;
         }
-        .score{
+
+        .score {
             text-align: center;
         }
 
-        .home{
+        .home {
             text-align: right;
         }
 
-        .topline{
+        .topline {
             font-size: 2em;
         }
-        ul{
+
+        ul {
             list-style: none;
+        }
+
+
+        #weeks{
+            margin-top:20px;
+        }
+
+        #weeks, #result {
+            display: none;
         }
     </style>
 
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script>
-        var results;
-        function start() {
-            results = document.getElementById('results');
-            var sat = 6;
-            if (moment().isoWeekday() <= sat) {
-                // then just give me this week's instance of that day
-                sat =  moment().isoWeekday(sat);
-            } else {
-                // otherwise, give me next week's instance of that day
-                sat =  moment().add(1, 'weeks').isoWeekday(sat);
-            }
 
-            var saturday = sat.format("YYYY-MM-DD");
+    <script>
+        var results, weeks, loading, weeksvalue;
+        var sat = 6;
+        if (moment().isoWeekday() <= sat) {
+            // then just give me this week's instance of that day
+            sat = moment().isoWeekday(sat);
+        } else {
+            // otherwise, give me next week's instance of that day
+            sat = moment().add(1, 'weeks').isoWeekday(sat);
+        }
+
+        var nextSat = sat.format("YYYY-MM-DD");
+
+
+        function start() {
+            results = $('#results');
+            weeks = $('#weeks');
+            weeksvalue = $('#weeksselect');
+            loading = $('#loading');
 
 
             // Initializes the client with the API key and the Translate API.
             gapi.client.init({
                 'apiKey': 'AIzaSyDVYI9DULFxk9aX8M4w2p-EE-STl5WWFsQ',
                 'discoveryDocs': ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
-            }).then(function(){
-                gapi.client.sheets.spreadsheets.values.get({
-                    spreadsheetId: '1nIsQ1_01nZ5xolXRo9hEHF4pdWKO53BpfRD7Q6OsZ6Y',
-                    range: saturday+"!A2:E",
-                }).then(function(response) {
+            }).then(function () {
 
 
-                    var sum =[0,0]
-                    var range = response.result;
-                    if (range && range.values.length > 0) {
-                        for (i = 0; i < range.values.length; i++) {
-                            var row = range.values[i];
-                            // Print columns A and E, which correspond to indices 0 and 4.
 
-                            if(row[4].toUpperCase()[0] == "H"){
-                                appendPre(row[0],row[1],row[2],row[3])
-                            }else {
-                                appendPre(row[3],row[2],row[1],row[0])
-                            }
-                            if(row[1]){
-                                sum[0] = sum[0] + row[1]*1;
-                            }
-                            if(row[2]){
-                                sum[1] += row[2]*1;
-                            }
+//                getWeek(saturday);
+//                debugger;
 
+
+                gapi.client.sheets.spreadsheets.get({spreadsheetId: '1nIsQ1_01nZ5xolXRo9hEHF4pdWKO53BpfRD7Q6OsZ6Y'}).then(function (response) {
+                    for (var i = 0; i < response.result.sheets.length; i++) {
+                        var sheet = response.result.sheets[i];
+                        if (i == 0 && sheet.properties.title !== nextSat) {
+                            weeksvalue.append("<option value='" + nextSat + "'>" + nextSat + "</option>");
                         }
-                        appendPre("Trojans", sum[0], sum[1], "Opposition", "topline")
-                    } else {
-                        appendPre('No data found.');
+                        weeksvalue.append("<option value='" + sheet.properties.title + "'>" + sheet.properties.title + "</option>");
+
                     }
-                }, function(response) {
-                    results.innerHTML = "<td>No matches found for " + saturday + "</td>";
+                    getWeek(nextSat);
+                    weeksvalue.on("change", function () {
+                        getWeek($(this).val());
+                    })
+                }, function (response) {
                 });
             })
         };
 
-        function appendPre(home, homescore, awayscore, away, classname) {
-            var li  = document.createElement("tr");
 
-            if(classname){
+        function getWeek(saturday) {
+
+            $('#results,#weeks').hide();
+            loading.show();
+
+            gapi.client.sheets.spreadsheets.values.get({
+                spreadsheetId: '1nIsQ1_01nZ5xolXRo9hEHF4pdWKO53BpfRD7Q6OsZ6Y',
+                range: saturday + "!A2:E",
+            }).then(function (response) {
+                results.empty();
+                var sum = [0, 0]
+                var range = response.result;
+                if (range && range.values.length > 0) {
+                    for (i = 0; i < range.values.length; i++) {
+                        var row = range.values[i];
+                        // Print columns A and E, which correspond to indices 0 and 4.
+
+                        if (row[4].toUpperCase()[0] == "H") {
+                            appendPre(row[0], row[1], row[2], row[3])
+                        } else {
+                            appendPre(row[3], row[2], row[1], row[0])
+                        }
+                        if (row[1]) {
+                            sum[0] = sum[0] + row[1] * 1;
+                        }
+                        if (row[2]) {
+                            sum[1] += row[2] * 1;
+                        }
+
+                    }
+                    appendPre("Trojans", sum[0], sum[1], "Opposition", "topline")
+                } else {
+                    appendPre('No data found.');
+                }
+
+                loading.hide();
+                $('#results,#weeks').show();
+
+            }, function (response) {
+                results.innerHTML = "<td>No matches found for " + saturday + "</td>";
+            });
+        }
+
+        function appendPre(home, homescore, awayscore, away, classname) {
+            var li = document.createElement("tr");
+
+            if (classname) {
                 li.className = classname;
             }
-            li.innerHTML = "<td class='home'>"+home+"</td><td class='score'>"+ homescore + " - " + awayscore +"</td><td>"+away+"</td>"
+            li.innerHTML = "<td class='home'>" + home + "</td><td class='score'>" + homescore + " - " + awayscore + "</td><td>" + away + "</td>"
 
-            if(classname){
-             results.insertBefore(li, results.firstChild);
-            }else {
-                results.appendChild(li);
+            if (classname) {
+                results.prepend(li);
+            } else {
+                results.append(li);
             }
         }
 
@@ -126,8 +180,15 @@
 </head>
 <body>
 <div id="container">
-    <div id="header"><h1 style="display: inline-block;">Results</h1><img style="float:right" src="https://static.wixstatic.com/media/33e701_3bfe1c4327544a938463335f19978c90~mv2.png/v1/fill/w_111,h_159,al_c,usm_0.66_1.00_0.01/33e701_3bfe1c4327544a938463335f19978c90~mv2.png"></div>
-     <table id="results" align="center"></table>
+    <div id="header"><h1 style="display: inline-block;">Results</h1><img style="float:right"
+                                                                         src="https://static.wixstatic.com/media/33e701_3bfe1c4327544a938463335f19978c90~mv2.png/v1/fill/w_111,h_159,al_c,usm_0.66_1.00_0.01/33e701_3bfe1c4327544a938463335f19978c90~mv2.png">
+    </div>
+    <table id="results" align="center"></table>
+
+    <div id="loading"><h1>Loading...</h1></div>
+
+
+    <div id="weeks">Week: <select id="weeksselect"></select></div>
 
 </div>
 </body>
