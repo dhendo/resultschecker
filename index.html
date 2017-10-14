@@ -137,9 +137,13 @@
                         weeksvalue.append("<option value='" + sheet.properties.title + "'>" + sheet.properties.title + "</option>");
 
                     }
-                    getWeek(nextSat);
+                    sat = nextSat;
+                    getWeek();
+
+                    setInterval(getWeek, 5 * 60 * 1000);
                     weeksvalue.on("change", function () {
-                        getWeek($(this).val());
+                        sat = $(this).val()
+                        getWeek();
                     })
                 }, function (response) {
                 });
@@ -147,8 +151,8 @@
         };
 
 
-        function getWeek(saturday) {
-
+        function getWeek() {
+            var saturday = sat;
             $('#results,#weeks').hide();
             loading.show();
 
@@ -203,9 +207,6 @@
 
         function appendPre(home, homescore, awayscore, away, classname) {
             var li = document.createElement("tr");
-
-
-
             if (classname == "topline") {
 
                 li.innerHTML = "<td class='home'>" + home + "</td><td class='score'>" + homescore + " - " + awayscore + "</td><td>" + away + "</td>"
