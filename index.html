@@ -15,6 +15,18 @@
             margin: 0;
         }
 
+
+        .win {
+        color: #00bb00
+        }
+        .lose{
+            color: #ee0000;
+        }
+        .draw{
+            color: #ffde25;
+        }
+
+
         #header {
             background-color: #f00;
             line-height: 120px;
@@ -53,18 +65,17 @@
             list-style: none;
         }
 
-
-        #weeks{
-            margin-top:20px;
+        #weeks {
+            margin-top: 20px;
         }
 
-        #weeks, #result {
+        #weeks, #results {
             display: none;
         }
 
         /* Smartphones (portrait and landscape) ----------- */
-        @media only screen and (min-device-width : 320px) and (max-device-width : 500px) {
-            #results{
+        @media only screen and (min-device-width: 320px) and (max-device-width: 500px) {
+            #results {
                 width: 100%;
                 font-size: 1.6em;
             }
@@ -152,11 +163,22 @@
                     for (i = 0; i < range.values.length; i++) {
                         var row = range.values[i];
                         // Print columns A and E, which correspond to indices 0 and 4.
+                        var resClass = "";
+
+                        if (row[1] !== "" && !isNaN(row[1]) && !isNaN(row[2])) {
+                            if (row[1] == row[2]) {
+                                resClass = "draw"
+                            } else if (row[1] > row[2]) {
+                                resClass = "win"
+                            } else {
+                                resClass = "lose"
+                            }
+                        }
 
                         if (row[4].toUpperCase()[0] == "H") {
-                            appendPre(row[0], row[1], row[2], row[3])
+                            appendPre(row[0], row[1], row[2], row[3], resClass)
                         } else {
-                            appendPre(row[3], row[2], row[1], row[0])
+                           appendPre(row[3], row[2], row[1], row[0], resClass)
                         }
                         if (row[1]) {
                             sum[0] = sum[0] + row[1] * 1;
@@ -182,14 +204,22 @@
         function appendPre(home, homescore, awayscore, away, classname) {
             var li = document.createElement("tr");
 
-            if (classname) {
-                li.className = classname;
-            }
-            li.innerHTML = "<td class='home'>" + home + "</td><td class='score'>" + homescore + " - " + awayscore + "</td><td>" + away + "</td>"
 
-            if (classname) {
+
+            if (classname == "topline") {
+
+                li.innerHTML = "<td class='home'>" + home + "</td><td class='score'>" + homescore + " - " + awayscore + "</td><td>" + away + "</td>"
+                li.className = classname;
                 results.prepend(li);
             } else {
+                var awayclass = classname;
+                if(classname == "win"){
+                    awayclass = "lose"
+                }else if(classname == "lose"){
+                    awayclass = "win"
+                }
+
+                li.innerHTML = "<td class='home "+classname+"'>" + home + "</td><td class='score'>" + homescore + " - " + awayscore + "</td><td class='"+awayclass+"'>" + away + "</td>"
                 results.append(li);
             }
         }
