@@ -16,8 +16,11 @@
         }
 
 
+        #logo{
+            display: none;
+        }
         .win {
-        color: #00bb00
+            color: #00bb00
         }
         .lose{
             color: #ee0000;
@@ -91,12 +94,13 @@
             .topline {
                 font-size: 1.2em;
             }
+        }
 
     </style>
 
 
     <script>
-        var results, weeks, loading, weeksvalue;
+        var results, weeks, loading, weeksvalue, getWeek;
         var sat = 6;
         if (moment().isoWeekday() <= sat) {
             // then just give me this week's instance of that day
@@ -124,16 +128,12 @@
 
 
 
-//                getWeek(saturday);
-//                debugger;
-
-
                 gapi.client.sheets.spreadsheets.get({spreadsheetId: '1nIsQ1_01nZ5xolXRo9hEHF4pdWKO53BpfRD7Q6OsZ6Y'}).then(function (response) {
                     for (var i = 0; i < response.result.sheets.length; i++) {
                         var sheet = response.result.sheets[i];
-                        if (i == 0 && sheet.properties.title !== nextSat) {
-                            weeksvalue.append("<option value='" + nextSat + "'>" + nextSat + "</option>");
-                        }
+//                        if (i == 0 && sheet.properties.title !== nextSat) {
+//                            weeksvalue.append("<option value='" + nextSat + "'>" + nextSat + "</option>");
+//                        }
                         weeksvalue.append("<option value='" + sheet.properties.title + "'>" + sheet.properties.title + "</option>");
 
                     }
@@ -151,10 +151,17 @@
         };
 
 
-        function getWeek() {
+        getWeek = function() {
             var saturday = sat;
             $('#results,#weeks,#stats').hide();
             loading.show();
+            try{
+                if(top.location == window.location){
+                    $("#logo").show();
+                }
+            }catch(e){
+
+            }
 
             var win=0, lose =0; draw = 0;
 
@@ -185,11 +192,10 @@
                             }
                         }
 
-
                         if (isHome) {
                             appendPre(row[0], row[1], row[2], row[3], resClass)
                         } else {
-                           appendPre(row[3], row[2], row[1], row[0], resClass)
+                            appendPre(row[3], row[2], row[1], row[0], resClass)
                         }
                         if (row[1]) {
                             sum[0] = sum[0] + row[1] * 1;
@@ -210,7 +216,18 @@
                 $('#results,#weeks,#stats').show();
 
             }, function (response) {
-                results.innerHTML = "<td>No matches found for " + saturday + "</td>";
+
+                if (sat == nextSat) {
+                    sat = $('#weeks option:eq(0)').attr("selected", "selected").val();
+                    $('#weeks').val(sat);
+                    getWeek();
+                } else {
+                    debugger;
+                    results.innerHTML = "<tr><td>No matches found for " + saturday + "</td></tr>";
+                    loading.hide();
+                    $('#results,#weeks,#stats').show();
+                }
+
             });
         }
 
@@ -240,7 +257,7 @@
 </head>
 <body>
 <div id="container">
-    <div id="header"><h1 style="display: inline-block;">Results</h1><img style="float:right"
+    <div id="header"><h1 style="display: inline-block;">Results</h1><img id="logo" style="float:right"
                                                                          src="https://static.wixstatic.com/media/33e701_3bfe1c4327544a938463335f19978c90~mv2.png/v1/fill/w_111,h_159,al_c,usm_0.66_1.00_0.01/33e701_3bfe1c4327544a938463335f19978c90~mv2.png">
     </div>
     <table id="results" align="center">
