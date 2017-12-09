@@ -197,10 +197,10 @@
                         } else {
                             appendPre(row[3], row[2], row[1], row[0], resClass)
                         }
-                        if (row[1]) {
+                        if (row[1] && !isNaN(row[1])) {
                             sum[0] = sum[0] + row[1] * 1;
                         }
-                        if (row[2]) {
+                        if (row[2] && !isNaN(row[2])) {
                             sum[1] += row[2] * 1;
                         }
 
