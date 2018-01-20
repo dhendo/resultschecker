@@ -169,51 +169,56 @@
                 spreadsheetId: '1nIsQ1_01nZ5xolXRo9hEHF4pdWKO53BpfRD7Q6OsZ6Y',
                 range: saturday + "!A2:E",
             }).then(function (response) {
-                results.empty();
-                var sum = [0, 0]
-                var range = response.result;
-                if (range && range.values.length > 0) {
-                    for (i = 0; i < range.values.length; i++) {
-                        var row = range.values[i];
-                        // Print columns A and E, which correspond to indices 0 and 4.
-                        var resClass = "";
 
-                        var isHome = row[4].toUpperCase()[0] == "H";
-                        if (row[1] !== "" && !isNaN(row[1]) && !isNaN(row[2])) {
-                            if (row[1] == row[2]) {
-                                resClass = "draw"
-                                draw++;
-                            } else if (row[1] > row[2]) {
-                                win++;
-                                resClass = isHome ? "win" : "lose";
-                            } else {
-                                lose++;
-                                resClass = isHome ? "lose" : "win";
+                try {
+                    results.empty();
+                    var sum = [0, 0]
+                    var range = response.result;
+                    if (range && range.values.length > 0) {
+                        for (i = 0; i < range.values.length; i++) {
+                            var row = range.values[i];
+                            // Print columns A and E, which correspond to indices 0 and 4.
+                            var resClass = "";
+
+                            var isHome = (row[4] || '').toUpperCase()[0] == "H";
+                            if (row[1] !== "" && !isNaN(row[1]) && !isNaN(row[2])) {
+                                if (row[1] == row[2]) {
+                                    resClass = "draw"
+                                    draw++;
+                                } else if (row[1] > row[2]) {
+                                    win++;
+                                    resClass = isHome ? "win" : "lose";
+                                } else {
+                                    lose++;
+                                    resClass = isHome ? "lose" : "win";
+                                }
                             }
-                        }
 
-                        if (isHome) {
-                            appendPre(row[0], row[1], row[2], row[3], resClass)
-                        } else {
-                            appendPre(row[3], row[2], row[1], row[0], resClass)
-                        }
-                        if (row[1] && !isNaN(row[1])) {
-                            sum[0] = sum[0] + row[1] * 1;
-                        }
-                        if (row[2] && !isNaN(row[2])) {
-                            sum[1] += row[2] * 1;
-                        }
+                            if (isHome) {
+                                appendPre(row[0], row[1], row[2], row[3], resClass)
+                            } else {
+                                appendPre(row[3], row[2], row[1], row[0], resClass)
+                            }
+                            if (row[1] && !isNaN(row[1])) {
+                                sum[0] = sum[0] + row[1] * 1;
+                            }
+                            if (row[2] && !isNaN(row[2])) {
+                                sum[1] += row[2] * 1;
+                            }
 
+                        }
+                        appendPre("Trojans", sum[0], sum[1], "Opposition", "topline")
+                        $("#results").append("<tfoot><tr><td colspan='4' align='center'>W: " + win + " L: " + lose + " D: " + draw + "</td></tr></tfoot>")
+                    } else {
+                        appendPre('No data found.');
+                        $('#stats').html('');
                     }
-                    appendPre("Trojans", sum[0], sum[1], "Opposition", "topline")
-                    $("#results").append("<tfoot><tr><td colspan='4' align='center'>W: " +win+ " L: " + lose + " D: " + draw +"</td></tr></tfoot>")
-                } else {
-                    appendPre('No data found.');
-                    $('#stats').html('');
-                }
 
-                loading.hide();
-                $('#results,#weeks,#stats').show();
+                    loading.hide();
+                    $('#results,#weeks,#stats').show();
+                }catch(e){
+
+                }
 
             }, function (response) {
 
@@ -222,7 +227,6 @@
                     $('#weeks').val(sat);
                     getWeek();
                 } else {
-                    debugger;
                     results.innerHTML = "<tr><td>No matches found for " + saturday + "</td></tr>";
                     loading.hide();
                     $('#results,#weeks,#stats').show();
@@ -234,7 +238,6 @@
         function appendPre(home, homescore, awayscore, away, homeclass) {
             var td = document.createElement("tr");
             if (homeclass == "topline") {
-
                 td.innerHTML = "<td class='home'>" + home + "</td><td class='score'>" + homescore + " - " + awayscore + "</td><td>" + away + "</td>"
                 td.className = homeclass;
                 results.prepend(td);
@@ -246,7 +249,7 @@
                     awayclass = "win"
                 }
 
-                td.innerHTML = "<td class='home "+homeclass+"'>" + home + "</td><td class='score'>" + homescore + " - " + awayscore + "</td><td class='"+awayclass+"'>" + away + "</td>"
+                td.innerHTML = "<td class='home "+homeclass+"'>" + (home || '') + "</td><td class='score'>" + (homescore || '') + " - " + (awayscore || '') + "</td><td class='"+awayclass+"'>" + (away || '') + "</td>"
                 results.append(td);
             }
         }
