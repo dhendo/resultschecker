@@ -16,8 +16,13 @@
         }
 
 
-        #logo{
+        #logo, #efr{
             display: none;
+        }
+
+        #efr {
+            margin-top:15px;
+            text-align:center;
         }
         .win {
             color: #00bb00
@@ -157,7 +162,7 @@
             loading.show();
             try{
                 if(top.location == window.location){
-                    $("#logo").show();
+                    $("#logo, #efr").show();
                 }
             }catch(e){
 
@@ -275,6 +280,8 @@
 
 
     <div id="weeks">Week: <select id="weeksselect"></select></div>
+
+    <div id="efr"><a href="https://www.easyfundraising.org.uk/invite/NNNVM0/EWSR6Y/"><img src="./easyfundraising.png" /></a></div>
 
 </div>
 </body>
